@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using C17_Ex02.Game.Player;
-using C17_Ex02.BasicDataTypes;
+﻿using C17_Ex02.BasicDataTypes;
 
-//todo: Doing game twice (Game.Gamesomething...)
 namespace C17_Ex02.Game
 {
     // Manages a Single-Game
@@ -20,17 +13,24 @@ namespace C17_Ex02.Game
             UnknownFailure
         }
 
-        private readonly GamePlayer[] m_Players;
-        private readonly Board<GameBoardCell> m_Board;
-        private readonly GameLogic m_Logic;
+        private readonly GamePlayers r_Players;
+        private readonly Board<GameBoardCell> r_Board;
+        private readonly GameLogic r_Logic;
         private uint m_CurrPlayersTurn = 0;
 
-        //todo: Rethink if should allow anything from the outside to access the board this way! encapsulation, perhaps duplicate it
         public Board<GameBoardCell> Board
         {
             get
             {
-                return m_Board;
+                return r_Board;
+            }
+        }
+
+        public GameBoardCell.eType CurrentPlayerCellType
+        {
+            get
+            {
+                return r_Players.Get(m_CurrPlayersTurn).CellType;
             }
         }
 
@@ -38,27 +38,27 @@ namespace C17_Ex02.Game
         {
             get
             {
-                return m_Logic.Result;
+                return r_Logic.Result;
             }
         }
 
-        public GameManager(uint i_BoardSize, GamePlayer[] i_Players)
+        public GameManager(uint i_BoardSize, GamePlayers i_Players)
         {
-            m_Players = i_Players;
-            m_Board = new Board<GameBoardCell>(i_BoardSize, i_BoardSize);
-            m_Logic = new GameLogic(m_Board, m_Players);
+            r_Players = i_Players;
+            r_Board = new Board<GameBoardCell>(i_BoardSize, i_BoardSize);
+            r_Logic = new GameLogic(r_Board, r_Players);
         }
 
         // Is input required for the next playing player
         public bool IsInputRequiredForCurrentTurn()
         {
-            return m_Players[m_CurrPlayersTurn].IsInputRequiredForMove();
+            return r_Players.Get(m_CurrPlayersTurn).IsInputRequiredForMove();
         }
 
         // Is the game over
         public bool IsGameOver()
         {
-            return m_Logic.IsGameOver();
+            return r_Logic.IsGameOver();
         }
 
         // handle a make move request from the game runner
@@ -72,7 +72,7 @@ namespace C17_Ex02.Game
             }
             else 
             {
-                retResult = handleValidMakeMoveRequest(i_InputForMove); //todo: If computer retrusn null its a problem of infinite loop
+                retResult = handleValidMakeMoveRequest(i_InputForMove);
             }
 
             return retResult;
@@ -83,14 +83,14 @@ namespace C17_Ex02.Game
         {
             eMoveResult retResult;
 
-            Point? currMove = m_Players[m_CurrPlayersTurn].MakeMove(m_Board, m_Logic, i_InputForMove);
+            Point? currMove = r_Players.Get(m_CurrPlayersTurn).MakeMove(r_Board, r_Logic, i_InputForMove);
             if (!currMove.HasValue)
             {
                 retResult = eMoveResult.BadInput;
             }
             else
             {
-                if (!m_Logic.IsMoveValid((Point)currMove))
+                if (!r_Logic.IsMoveValid((Point)currMove))
                 {
                     retResult = eMoveResult.UnknownFailure;
                 }
@@ -108,8 +108,8 @@ namespace C17_Ex02.Game
         {
             eMoveResult retResult;
 
-            m_Logic.Set(i_Move, m_CurrPlayersTurn);
-            if (m_Logic.IsGameOver())
+            r_Logic.Set(i_Move, m_CurrPlayersTurn);
+            if (r_Logic.IsGameOver())
             {
                 retResult = eMoveResult.GameOver;
             }
@@ -117,7 +117,7 @@ namespace C17_Ex02.Game
             {
                 retResult = eMoveResult.Success;
                 m_CurrPlayersTurn++;
-                if (m_CurrPlayersTurn >= m_Players.Length)
+                if (m_CurrPlayersTurn >= r_Players.Length)
                 {
                     m_CurrPlayersTurn = 0;
                 }

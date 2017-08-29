@@ -2,8 +2,10 @@
 {
     class Program
     {
-        public static void Main() {
-            ReversedTicTacToe.Run();
+        public static void Main()
+        {
+            ReversedTicTacToe reversedTicTacToeGame = new ReversedTicTacToe();
+            reversedTicTacToeGame.run();
         }
     }
 }

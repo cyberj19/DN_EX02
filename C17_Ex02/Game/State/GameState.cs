@@ -11,18 +11,18 @@ namespace C17_Ex02.Game.State
         private const uint k_BasicPointNumLines = 2; // col + row
         private const int k_SizeToIndexDifference = 1;
         private const int k_ItemNotFound = -1;
+        private readonly BoardLineState[] r_RowsState;
+        private readonly BoardLineState[] r_ColsState;
+        private readonly LinkedList<Point> r_FreePoints;
         private BoardLineState m_DiagonalState; // Can be changed, cannot be readonly
         private BoardLineState m_AntiDiagonalState; // Can be changed, cannot be readonly
-        private readonly BoardLineState[] m_RowsState;
-        private readonly BoardLineState[] m_ColsState;
-        private readonly LinkedList<Point> m_FreePoints; //todo: Check all read only 1. check if needed 2. change all names to r_
         private uint m_TotalNumOfSetFunctionCalls;
 
         public LinkedList<Point> FreeBoardPoints
         {
             get
             {
-                return m_FreePoints;
+                return r_FreePoints;
             }
         }
 
@@ -33,9 +33,9 @@ namespace C17_Ex02.Game.State
             m_TotalNumOfSetFunctionCalls = 0;
             m_DiagonalState = new BoardLineState(BoardLineState.eLineType.Diagonal, i_AmountOfPlayers, diagonalSize);
             m_AntiDiagonalState = new BoardLineState(BoardLineState.eLineType.AntiDiagonal, i_AmountOfPlayers, diagonalSize);
-            m_RowsState = createStateArray(BoardLineState.eLineType.Row, i_AmountOfPlayers, i_NumCols, i_NumRows);
-            m_ColsState = createStateArray(BoardLineState.eLineType.Col, i_AmountOfPlayers, i_NumRows, i_NumCols);
-            m_FreePoints = createBoardPointsLinkedList(i_NumRows, i_NumCols);
+            r_RowsState = createStateArray(BoardLineState.eLineType.Row, i_AmountOfPlayers, i_NumCols, i_NumRows);
+            r_ColsState = createStateArray(BoardLineState.eLineType.Col, i_AmountOfPlayers, i_NumRows, i_NumCols);
+            r_FreePoints = createBoardPointsLinkedList(i_NumRows, i_NumCols);
         }
 
         // If there's a player that has a full line of it's cells - returns player index.
@@ -72,8 +72,8 @@ namespace C17_Ex02.Game.State
             uint numOfLines = getNumLinesOfPoint(i_Pos);
             List<BoardLineState> retLines = new List<BoardLineState>((int)numOfLines);
 
-            retLines.Add(m_RowsState[i_Pos.Y]);
-            retLines.Add(m_ColsState[i_Pos.X]);
+            retLines.Add(r_RowsState[i_Pos.Y]);
+            retLines.Add(r_ColsState[i_Pos.X]);
             if (IsInDiagonal(i_Pos))
             {
                 retLines.Add(m_DiagonalState);
@@ -108,13 +108,13 @@ namespace C17_Ex02.Game.State
         // Is cell in the diagonal
         public bool IsInDiagonal(Point i_Pos)
         {
-            return (i_Pos.X == i_Pos.Y);
+            return i_Pos.X == i_Pos.Y;
         }
 
         // Is cell in the anti diagonal
         public bool IsInAntiDiagonal(Point i_Pos)
         {
-            return (i_Pos.Y == (m_ColsState.Length - k_SizeToIndexDifference - i_Pos.X));
+            return i_Pos.Y == (r_ColsState.Length - k_SizeToIndexDifference - i_Pos.X);
         }
 
         // Create points linked list (Represents empty points linked list in a board)
@@ -136,7 +136,7 @@ namespace C17_Ex02.Game.State
         // Delete a point from the list of empty cells
         private void deletePointFromFreePointsLinkedList(Point i_Pos)
         {
-            m_FreePoints.Remove(i_Pos);
+            r_FreePoints.Remove(i_Pos);
         }
 
         // 'Set' a cell in our state (Update all relevant lines of a cell)
@@ -144,8 +144,8 @@ namespace C17_Ex02.Game.State
         {
             m_TotalNumOfSetFunctionCalls++;
             deletePointFromFreePointsLinkedList(i_Pos); // Point is no longer empty
-            m_RowsState[i_Pos.Y].Set(i_PlayerIndex); // update stae of relevant lines state
-            m_ColsState[i_Pos.X].Set(i_PlayerIndex);
+            r_RowsState[i_Pos.Y].Set(i_PlayerIndex); // update stae of relevant lines state
+            r_ColsState[i_Pos.X].Set(i_PlayerIndex);
             if (IsInDiagonal(i_Pos))
             {
                 m_DiagonalState.Set(i_PlayerIndex);
@@ -160,7 +160,7 @@ namespace C17_Ex02.Game.State
         // Are all states full?
         public bool AreStatesFull()
         {
-            return (int)m_TotalNumOfSetFunctionCalls == (m_RowsState.Length * m_ColsState.Length);
+            return (int)m_TotalNumOfSetFunctionCalls == (r_RowsState.Length * r_ColsState.Length);
         }
         
         // Creates a line state array of same eLineType

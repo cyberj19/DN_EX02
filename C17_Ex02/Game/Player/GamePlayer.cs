@@ -10,14 +10,25 @@ namespace C17_Ex02.Game.Player
             ComputerPlayer
         }
 
-        private readonly eType m_Type;
-        private readonly GameBoardCell.eType m_CellType;
+        private readonly eType r_Type;
+        private readonly GameBoardCell.eType r_CellType;
+        private uint m_Score;
+        private HumanLogic m_HumanLogic = null;
+        private ComputerLogic m_ComputerLogic = null;
 
         public eType Type
         {
             get
             {
-                return m_Type;
+                return r_Type;
+            }
+        }
+
+        public uint Score
+        {
+            get
+            {
+                return m_Score;
             }
         }
 
@@ -25,14 +36,33 @@ namespace C17_Ex02.Game.Player
         {
             get
             {
-                return m_CellType;
+                return r_CellType;
             }
         }
 
         public GamePlayer(eType i_Type, GameBoardCell.eType i_CellType)
         {
-            m_Type = i_Type;
-            m_CellType = i_CellType;
+            m_Score = 0;
+            r_Type = i_Type;
+            r_CellType = i_CellType;
+        }
+
+        public void ResetLogicState()
+        {
+            switch (r_Type)
+            {
+                case eType.HumanPlayer:
+                    m_HumanLogic = new HumanLogic();
+                    break;
+                case eType.ComputerPlayer:
+                    m_ComputerLogic = new ComputerLogic();
+                    break;
+            }
+        }
+
+        public void AddScore()
+        {
+            m_Score++;
         }
 
         // is input required for the next make move request
@@ -40,7 +70,7 @@ namespace C17_Ex02.Game.Player
         {
             bool isInputRequired;
 
-            switch (m_Type)
+            switch (r_Type)
             {
                 case eType.HumanPlayer:
                     isInputRequired = true;
@@ -59,7 +89,7 @@ namespace C17_Ex02.Game.Player
         // Generate a GameBoardCell according to player's cell type
         public GameBoardCell GenereateCell()
         {
-            return new GameBoardCell(m_CellType);
+            return new GameBoardCell(r_CellType);
         }
 
         // Make a game move
@@ -73,13 +103,14 @@ namespace C17_Ex02.Game.Player
             }
             else
             {
-                switch (m_Type)
+                switch (r_Type)
                 {
                     case eType.ComputerPlayer:
-                        retMove = ComputerLogic.MakeMove(i_Board, m_CellType, i_GameLogic);
+                        // forbidden return null as a computer move! as it should not get any input (An exception will be thrown)
+                        retMove = (Point)m_ComputerLogic.MakeMove(i_Board, r_CellType, i_GameLogic);
                         break;
                     case eType.HumanPlayer:
-                        retMove = HumanLogic.MakeMove(i_Board, (Point)i_Input, m_CellType, i_GameLogic);
+                        retMove = m_HumanLogic.MakeMove(i_Board, (Point)i_Input, r_CellType, i_GameLogic);
                         break;
                     default:
                         retMove = null;

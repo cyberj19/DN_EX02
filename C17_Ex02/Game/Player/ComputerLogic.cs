@@ -1,34 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using C17_Ex02.BasicDataTypes;
+﻿using C17_Ex02.BasicDataTypes;
+using C17_Ex02.Game.Player.Algorithm;
 
 namespace C17_Ex02.Game.Player
 {
     class ComputerLogic
     {
-        static public Point? MakeMove(Board<GameBoardCell> i_Board, GameBoardCell.eType i_CellType, GameLogic i_GameLogic)
-        {
-            Point? retMove = null;
+        private ReverseTicTacToeAlgo m_Algorithm;
+        private bool m_IsFirstMakeMove = true;
 
-            return i_GameLogic.State.FreeBoardPoints.ToArray()[0];
-            /*
-            //todo: might have to check LastNextCallValue not null
-            TwoDimensionalArrayGenerator<GameBoardCell> generator = i_Board.GetItemsGenerator();
-            
-            while (!generator.HasFinished())
+        public void init(GameBoardCell.eType i_Sign, GameLogic i_GameLogic)
+        {
+            m_Algorithm = new ReverseTicTacToeAlgo(i_Sign, i_GameLogic.State, i_GameLogic);
+        }
+
+        public Point? MakeMove(Board<GameBoardCell> i_Board, GameBoardCell.eType i_CellType, GameLogic i_GameLogic)
+        {
+            if (m_IsFirstMakeMove)
             {
-                GameBoardCell currentBoardCell = generator.Next();
-                
-                if (currentBoardCell.Type == GameBoardCell.eType.None)
-                {
-                    retMove = generator.LastNextCallPos;
-                    break;
-                }
+                m_IsFirstMakeMove = false;
+                init(i_CellType, i_GameLogic);
             }
-            */
-            return retMove;
+
+            return m_Algorithm.GetMove();
         }
     }
 }

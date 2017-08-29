@@ -13,26 +13,26 @@
         private const string k_StringO = "O";
         private const string k_StringX = "X";
         private const string k_StringNone = " ";
-        private readonly eType m_Type;
+        private readonly eType r_Type;
         
         public eType Type
         {
             get
             {
-                return m_Type;
+                return r_Type;
             }
         }
 
         public GameBoardCell(eType i_Type)
         {
-            m_Type = i_Type;
+            r_Type = i_Type;
         }
 
         public override string ToString()
         {
             string ret;
 
-            switch(m_Type)
+            switch(r_Type)
             {
                 case eType.O:
                     ret = k_StringO;

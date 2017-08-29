@@ -37,13 +37,16 @@
   <ItemGroup>
     <Compile Include="BasicDataTypes\Board.cs" />
     <Compile Include="BasicDataTypes\Point.cs" />
+    <Compile Include="BasicDataTypes\PositiveRange.cs" />
+    <Compile Include="BasicDataTypes\TwoDimensionalPositiveRange.cs" />
     <Compile Include="Game\GameBoardCell.cs" />
     <Compile Include="Game\GameLogic.cs" />
     <Compile Include="Game\GameManager.cs" />
+    <Compile Include="Game\GamePlayers.cs" />
     <Compile Include="Game\GameResult.cs" />
     <Compile Include="Game\Player\Algorithm\ReverseTicTacToeAlgo.cs" />
     <Compile Include="Game\Player\ComputerLogic.cs" />
-    <Compile Include="Game\Player\eGameType.cs" />
+    <Compile Include="Game\GameType.cs" />
     <Compile Include="Game\Player\HumanLogic.cs" />
     <Compile Include="Game\Player\GamePlayer.cs" />
     <Compile Include="Game\State\BoardLineState.cs" />

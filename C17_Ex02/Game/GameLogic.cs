@@ -1,16 +1,15 @@
-﻿using C17_Ex02.BasicDataTypes;
-using C17_Ex02.Game.Player;
+﻿using System.Collections.Generic;
+using C17_Ex02.BasicDataTypes;
 using C17_Ex02.Game.State;
-using System.Collections.Generic;
 
 namespace C17_Ex02.Game
 {
     class GameLogic
     {
         private const int k_FirstAndOnlyItem = 0;
-        private readonly Board<GameBoardCell> m_Board;
-        private readonly GamePlayer[] m_Players;
-        private readonly GameState m_State;
+        private readonly Board<GameBoardCell> r_Board;
+        private readonly GamePlayers r_Players;
+        private readonly GameState r_State;
         private List<uint> m_IndicesOfPlayersThatAreStillPlaying;
         private GameResult? m_GameResult;
 
@@ -18,7 +17,7 @@ namespace C17_Ex02.Game
         {
             get
             {
-                return m_State;
+                return r_State;
             }
         }
 
@@ -32,38 +31,37 @@ namespace C17_Ex02.Game
             }
         }
         
-        public GameLogic(Board<GameBoardCell> i_Board, GamePlayer[] i_Players)
+        public GameLogic(Board<GameBoardCell> i_Board, GamePlayers i_Players)
         {
             m_GameResult = null;
-            m_Board = i_Board;
-            m_Players = i_Players;
-            m_State = new GameState((uint)i_Players.Length, i_Board.Rows, i_Board.Cols);
-            m_IndicesOfPlayersThatAreStillPlaying = new List<uint>(m_Players.Length);
-            for (uint i = 0; i < m_Players.Length; i++)
+            r_Board = i_Board;
+            r_Players = i_Players;
+            r_State = new GameState((uint)i_Players.Length, i_Board.Rows, i_Board.Cols);
+            m_IndicesOfPlayersThatAreStillPlaying = new List<uint>((int)r_Players.Length);
+            for (uint i = 0; i < r_Players.Length; i++)
             {
                 m_IndicesOfPlayersThatAreStillPlaying.Add(i);
             }
         }
 
-        //todo: PRoblematic, users has acces to it
         // Set a game-move
         public void Set(Point i_Pos, uint i_PlayerIndex)
         {
-            m_Board.Set(i_Pos, m_Players[i_PlayerIndex].GenereateCell());
-            m_State.Set(i_Pos, i_PlayerIndex);
+            r_Board.Set(i_Pos, r_Players.Get(i_PlayerIndex).GenereateCell());
+            r_State.Set(i_Pos, i_PlayerIndex);
             updateIsGameOver(i_Pos);
         }
 
         // Check if a board cell is empty
         public bool IsEmptyCell(Point i_Move)
         {
-            return m_Board.Get(i_Move).Type == GameBoardCell.eType.None;
+            return r_Board.Get(i_Move).Type == GameBoardCell.eType.None;
         }
 
         // Check if a move is valid
         public bool IsMoveValid(Point i_Move)
         {
-            return m_Board.IsInBounds(i_Move) && IsEmptyCell(i_Move);
+            return r_Board.IsInBounds(i_Move) && IsEmptyCell(i_Move);
         }
 
         // Check is game is over (The actual check is made once after each move)
@@ -87,17 +85,14 @@ namespace C17_Ex02.Game
             retGameResult = getGameResultIfOnlyOnePlayerOrLessLeft();
             if (!retGameResult.HasValue)
             {
-                if (IsBoardFull())
+                loserIndex = r_State.GetPlayerIfPointInFullLine(i_Pos, m_IndicesOfPlayersThatAreStillPlaying);
+                if (loserIndex.HasValue)
+                {
+                    m_IndicesOfPlayersThatAreStillPlaying.Remove(loserIndex.Value);
+                }
+                else if (IsBoardFull())
                 {
                     m_IndicesOfPlayersThatAreStillPlaying.Clear();
-                }
-                else
-                {
-                    loserIndex = m_State.GetPlayerIfPointInFullLine(i_Pos, m_IndicesOfPlayersThatAreStillPlaying);
-                    if (loserIndex.HasValue)
-                    {
-                        m_IndicesOfPlayersThatAreStillPlaying.Remove(loserIndex.Value);
-                    }
                 }
 
                 retGameResult = getGameResultIfOnlyOnePlayerOrLessLeft();
@@ -131,26 +126,13 @@ namespace C17_Ex02.Game
         // Converts Player's index to cell type
         public GameBoardCell.eType PlayerIndexToCellType(uint i_PlayerIndex)
         {
-            return m_Players[i_PlayerIndex].CellType;
+            return r_Players.PlayerIndexToCellType(i_PlayerIndex);
         }
 
         // Converts GameBoardCell to Player's index in the Player's array.
         public uint CellTypeToPlayerIndex(GameBoardCell.eType i_Type)
         {
-            uint? retIndex = null;
-
-            if (i_Type != GameBoardCell.eType.None)
-            {
-                for (uint i = 0; i < m_Players.Length; i++)
-                {
-                    if (i_Type == m_Players[i].CellType)
-                    {
-                        retIndex = i;
-                    }
-                }
-            }
-
-            return (uint)retIndex;
+            return r_Players.CellTypeToPlayerIndex(i_Type);
         }
 
         // Is the board Full.
@@ -158,7 +140,7 @@ namespace C17_Ex02.Game
         // So the next calculation wont tell us that the board is full.
         public bool IsBoardFull()
         {
-            return m_State.AreStatesFull();
+            return r_State.AreStatesFull();
         }
     }
 }
